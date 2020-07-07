@@ -38,6 +38,7 @@ Not:                            '!';
 Multiply:                       '*';
 Divide:                         '/';
 Modulus:                        '%';
+Coalesce:                       '??';
 Power:                          '**';
 RightShiftArithmetic:           '>>';
 LeftShiftArithmetic:            '<<';

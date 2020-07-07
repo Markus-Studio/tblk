@@ -43,3 +43,24 @@ test({
     assertEqual(template({ x: [0, 1, 2, 3] }), '0123');
   }
 });
+
+test({
+  name: 'CoalesceExpression',
+  fn() {
+    const template = compile('<% a ?? b %>');
+    assertEqual(template({ a: null, b: 5 }), '5');
+    assertEqual(template({ a: undefined, b: 5 }), '5');
+    assertEqual(template({ a: 3, b: 5 }), '3');
+    assertEqual(template({ a: false, b: 5 }), 'false');
+  }
+});
+
+test({
+  name: 'Nested CoalesceExpression',
+  fn() {
+    const template = compile('<% a ?? b ?? c %>');
+    assertEqual(template({ a: null, b: null, c: 5 }), '5');
+    assertEqual(template({ a: null, b: 4, c: 5 }), '4');
+    assertEqual(template({ a: 3, b: 4, c: 5 }), '3');
+  }
+});

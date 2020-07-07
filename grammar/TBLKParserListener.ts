@@ -14,6 +14,7 @@ import { NotExpressionContext } from "./TBLKParser";
 import { PowerExpressionContext } from "./TBLKParser";
 import { MultiplicativeExpressionContext } from "./TBLKParser";
 import { AdditiveExpressionContext } from "./TBLKParser";
+import { CoalesceExpressionContext } from "./TBLKParser";
 import { BitShiftExpressionContext } from "./TBLKParser";
 import { RelationalExpressionContext } from "./TBLKParser";
 import { InstanceofExpressionContext } from "./TBLKParser";
@@ -202,6 +203,19 @@ export interface TBLKParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitAdditiveExpression?: (ctx: AdditiveExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `CoalesceExpression`
+	 * labeled alternative in `TBLKParser.singleExpression`.
+	 * @param ctx the parse tree
+	 */
+	enterCoalesceExpression?: (ctx: CoalesceExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `CoalesceExpression`
+	 * labeled alternative in `TBLKParser.singleExpression`.
+	 * @param ctx the parse tree
+	 */
+	exitCoalesceExpression?: (ctx: CoalesceExpressionContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `BitShiftExpression`

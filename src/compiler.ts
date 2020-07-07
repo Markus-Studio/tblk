@@ -75,12 +75,12 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
     this.indentLevel++;
 
     const body = [
-      // result, prefix
       this.indention,
       'const w = new Writer();\n',
+      // tmp is used when downlevel-ing CoalesceExpressions.
+      ...(this.mode === 'typescript' ? [] : [this.indention, 'let tmp;\n']),
       this.indention,
       'const data = $;\n',
-      // This function is used to write anything that might have line breaks.
       ...context.partial().map(c => this.visit(c)),
       ...context.row().map(c => this.visit(c)),
       this.indention,
@@ -391,6 +391,23 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
       this.visit(node.singleExpression(0)),
       node.children![1].text,
       this.visit(node.singleExpression(1))
+    ]);
+  }
+
+  visitCoalesceExpression(node: Parser.CoalesceExpressionContext) {
+    if (this.mode === 'typescript') {
+      return this.text(node, [
+        this.visit(node.singleExpression(0)),
+        '??',
+        this.visit(node.singleExpression(1))
+      ]);
+    }
+    return this.text(node, [
+      '(tmp = (',
+      this.visit(node.singleExpression(0)),
+      '), (tmp !== null && tmp !== undefined) ? tmp : ',
+      this.visit(node.singleExpression(1)),
+      ')'
     ]);
   }
 
