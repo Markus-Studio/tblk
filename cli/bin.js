@@ -6,11 +6,16 @@ const path = require('path');
 
 const cwd = process.cwd();
 
+let mode = 'javascript';
+let ext = '.js';
 let output;
 let files = [];
 for (let i = 2; i < process.argv.length; ++i) {
   const arg = process.argv[i];
-  if (arg === '-o') {
+  if (arg === '-ts') {
+    mode = 'typescript';
+    ext = '.ts';
+  } else if (arg === '-o') {
     output = process.argv[i + 1]
     // Consume the next arg as well.
     i += 1;
@@ -26,7 +31,7 @@ function getBaseName(file) {
 }
 
 function getOutputPathFor(file) {
-  const filename = getBaseName(file) + '.js';
+  const filename = getBaseName(file) + ext;
   const dir = output ? output : path.dirname(file);
   return path.join(dir, filename);
 }
@@ -36,7 +41,7 @@ for (const file of files) {
   const source = fs.readFileSync(file, 'utf-8');
   const out = lib.compileSource(source, {
     uri: file,
-    iife: false,
+    mode,
     sourceMap: true
   });
   fs.writeFileSync(output, out);
