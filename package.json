@@ -1,0 +1,28 @@
+{
+  "name": "antlr",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "antlr": "antlr4ts -visitor -o grammar TBLKLexer.g4 TBLKParser.g4",
+    "test": "ts-node tests",
+    "build": "tsc"
+  },
+  "bin": {
+    "tblk": "./dist/cli"
+  },
+  "dependencies": {
+    "antlr4ts": "^0.5.0-alpha.3",
+    "btoa": "^1.2.1",
+    "source-map": "^0.7.3"
+  },
+  "devDependencies": {
+    "@types/btoa": "^1.2.3",
+    "@types/node": "^14.0.14",
+    "antlr4ts-cli": "^0.5.0-alpha.3",
+    "liltest": "^0.0.5",
+    "ts-node": "^8.10.2",
+    "tslib": "^2.0.0",
+    "typescript": "^3.9.6"
+  }
+}
