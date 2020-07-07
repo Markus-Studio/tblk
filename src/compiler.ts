@@ -79,7 +79,7 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
       this.indention,
       'const w = new Writer();\n',
       this.indention,
-      'const $data = $;\n',
+      'const data = $;\n',
       // This function is used to write anything that might have line breaks.
       ...context.partial().map(c => this.visit(c)),
       ...context.row().map(c => this.visit(c)),
@@ -126,7 +126,7 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
       this.visit(context.identifier()),
       this.mode === 'typescript' ? '($: Record<string, any>) {\n' : '($) {\n',
       this.indention,
-      '$.__proto__ = $data;\n',
+      '$.__proto__ = data;\n',
       this.indention,
       'w.push();\n'
     ]);
