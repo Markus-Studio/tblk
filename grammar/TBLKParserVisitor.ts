@@ -29,6 +29,7 @@ import { IdentifierExpressionContext } from "./TBLKParser";
 import { LiteralExpressionContext } from "./TBLKParser";
 import { ParenthesizedExpressionContext } from "./TBLKParser";
 import { DocumentContext } from "./TBLKParser";
+import { PartialContext } from "./TBLKParser";
 import { RowContext } from "./TBLKParser";
 import { SegmentContext } from "./TBLKParser";
 import { SpanContext } from "./TBLKParser";
@@ -38,6 +39,10 @@ import { LoopEndContext } from "./TBLKParser";
 import { IfBeginContext } from "./TBLKParser";
 import { ElseCmdContext } from "./TBLKParser";
 import { IfEndContext } from "./TBLKParser";
+import { PartialBeginContext } from "./TBLKParser";
+import { PartialEndContext } from "./TBLKParser";
+import { PartialUseContext } from "./TBLKParser";
+import { AssignmentContext } from "./TBLKParser";
 import { ArgumentsContext } from "./TBLKParser";
 import { ArgumentContext } from "./TBLKParser";
 import { ExpressionSequenceContext } from "./TBLKParser";
@@ -266,6 +271,13 @@ export interface TBLKParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitDocument?: (ctx: DocumentContext) => Result;
 
 	/**
+	 * Visit a parse tree produced by `TBLKParser.partial`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPartial?: (ctx: PartialContext) => Result;
+
+	/**
 	 * Visit a parse tree produced by `TBLKParser.row`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -327,6 +339,34 @@ export interface TBLKParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitIfEnd?: (ctx: IfEndContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `TBLKParser.partialBegin`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPartialBegin?: (ctx: PartialBeginContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `TBLKParser.partialEnd`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPartialEnd?: (ctx: PartialEndContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `TBLKParser.partialUse`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPartialUse?: (ctx: PartialUseContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `TBLKParser.assignment`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitAssignment?: (ctx: AssignmentContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `TBLKParser.arguments`.

@@ -29,7 +29,7 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
   protected check(expected: ControlFlowItem) {
     const length = this.controlFlowStack.length;
     if (length === 0) {
-      throw new SyntaxError("Ran out of control-flow stack");
+      throw new SyntaxError('Ran out of control-flow stack');
     } else {
       const actual = this.controlFlowStack[length - 1];
       if (actual !== expected) {
@@ -64,27 +64,62 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
   visitDocument(context: Parser.DocumentContext) {
     const body = [
       // result, prefix
-      "const w = new Writer();\n",
+      'const w = new Writer();\n',
+      'const $data = $;\n',
       // This function is used to write anything that might have line breaks.
-      this.visitChildren(context),
-      "w.flush();\n",
-      "return w.result;\n",
+      ...context.partial().map(c => this.visit(c)),
+      ...context.row().map(c => this.visit(c)),
+      'w.flush();\n',
+      'return w.result.trimRight();\n'
     ];
 
     if (this.iife) {
-      return new SourceNode(1, 0, "tng://internal", [
-        "(function (Writer) { return function render($) {",
+      return new SourceNode(1, 0, 'tng://internal', [
+        '(function (Writer) { return function render($) {',
         ...body,
-        "}})",
+        '}})'
       ]);
     } else {
-      return new SourceNode(1, 0, "tng://internal", [
+      return new SourceNode(1, 0, 'tng://internal', [
         'const { Writer } = require("tblk");\n',
-        "module.exports = function render($) {\n",
+        'module.exports = function render($) {\n',
         ...body,
-        "}",
+        '}'
       ]);
     }
+  }
+
+  visitPartialBegin(context: Parser.PartialBeginContext) {
+    return this.text(context, [
+      'function $',
+      this.visit(context.identifier()),
+      '(_) {\n',
+      'const $ = {...$data, ..._};\n',
+      'w.push();\n'
+    ]);
+  }
+
+  visitPartialEnd(context: Parser.PartialEndContext) {
+    return this.text(context, ['w.pop();\n', '}\n']);
+  }
+
+  visitPartialUse(context: Parser.PartialUseContext) {
+    return this.text(context, [
+      '$',
+      this.visit(context.identifier()),
+      '({',
+      ...context.assignment().map(c => this.visit(c)),
+      '})\n'
+    ]);
+  }
+
+  visitAssignment(context: Parser.AssignmentContext) {
+    return this.text(context, [
+      this.visit(context.identifier()),
+      ':',
+      this.visit(context.singleExpression()),
+      ','
+    ]);
   }
 
   visitRow(context: Parser.RowContext) {
@@ -93,18 +128,18 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
     let didWrote = false;
 
     if (segments.length === 0) {
-      return this.text(context, "w.brk();\n");
+      return this.text(context, 'w.brk();\n');
     }
 
     if (isSpanSegment(segments[0])) {
       const first = segments.shift()!;
       const text = first.text;
 
-      const willPrint = segments.some(seg => isSpanSegment(seg) || isPrintSegment(seg));
+      const willPrint = segments.some(seg => isWordSeg(seg));
       didWrote = willPrint;
 
       if (segments.length === 0) {
-        sourceNode.add(["w.result += ", JSON.stringify(text + "\n"), ";\n"]);
+        sourceNode.add(['w.result += ', JSON.stringify(text + '\n'), ';\n']);
         return sourceNode;
       }
 
@@ -115,21 +150,21 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
       if (prefix && rest) {
         sourceNode.add(
           this.text(first, [
-            "w.indent = " + JSON.stringify(prefix) + ";\n",
-            "w.write(" + JSON.stringify(rest) + ");\n",
+            'w.indent(' + JSON.stringify(prefix) + ');\n',
+            'w.write(' + JSON.stringify(rest) + ');\n'
           ])
         );
       } else if (rest) {
         sourceNode.add(
-          this.text(first, ["w.write(" + JSON.stringify(rest) + ");\n"])
+          this.text(first, ['w.write(' + JSON.stringify(rest) + ');\n'])
         );
       } else if (willPrint) {
         sourceNode.add(
-          this.text(first, ["w.indent = " + JSON.stringify(prefix) + ";\n"])
+          this.text(first, ['w.indent(' + JSON.stringify(prefix) + ');\n'])
         );
       }
     } else {
-      didWrote = segments.some(seg => isSpanSegment(seg) || isPrintSegment(seg));
+      didWrote = segments.some(seg => isWordSeg(seg));
     }
 
     for (const segment of segments) {
@@ -137,48 +172,55 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
     }
 
     if (didWrote) {
-      sourceNode.add("w.brk();\n");
+      sourceNode.add('w.brk();\n');
     }
 
     return sourceNode;
   }
 
   visitSpan(context: Parser.SpanContext) {
-    return this.text(context, "w.write(" + JSON.stringify(context.text) + ");\n");
+    return this.text(
+      context,
+      'w.write(' + JSON.stringify(context.text) + ');\n'
+    );
   }
 
   visitPrint(context: Parser.PrintContext) {
-    return this.text(context, ["w.write(", this.visitChildren(context), ");\n"]);
+    return this.text(context, [
+      'w.write(',
+      this.visitChildren(context),
+      ');\n'
+    ]);
   }
 
   visitLoopBegin(context: Parser.LoopBeginContext) {
-    this.controlFlowStack.push("for");
-    const id = context.identifier()
+    this.controlFlowStack.push('for');
+    const id = context.identifier();
     const expr = this.visit(context.expressionSequence());
     this.symbols.pushFrame();
     this.symbols.set(id.text, null);
     return this.text(context, [
-      "for (const _",
+      'for (const _',
       this.visit(id),
-      " of ",
+      ' of ',
       expr,
-      ") {\n",
+      ') {\n'
     ]);
   }
 
   visitLoopEnd(context: Parser.LoopEndContext) {
-    this.pop("for");
+    this.pop('for');
     this.symbols.popFrame();
-    return this.text(context, "}\n");
+    return this.text(context, '}\n');
   }
 
   visitIfBegin(context: Parser.IfBeginContext) {
     this.usedElse = false;
-    this.controlFlowStack.push("if");
+    this.controlFlowStack.push('if');
     return this.text(context, [
-      "if (",
+      'if (',
       this.visit(context.expressionSequence()),
-      ") {\n",
+      ') {\n'
     ]);
   }
 
@@ -190,18 +232,16 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
   }
 
   visitIfEnd(context: Parser.IfEndContext) {
-    this.pop("if");
-    return this.text(context, "}\n");
+    this.pop('if');
+    return this.text(context, '}\n');
   }
 
   // ---------------------------------------- JS Expressions
   visitExpressionSequence(node: Parser.ExpressionSequenceContext) {
-    const expressions = node
-      .singleExpression()
-      .map((child) => this.visit(child));
+    const expressions = node.singleExpression().map(child => this.visit(child));
     const source = this.text(node, [expressions.shift()!]);
     for (const expression of expressions) {
-      source.add(",");
+      source.add(',');
       source.add(expression);
     }
     return source;
@@ -210,45 +250,42 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
   visitMemberIndexExpression(node: Parser.MemberIndexExpressionContext) {
     return this.text(node, [
       this.visit(node.singleExpression()),
-      "[",
+      '[',
       this.visit(node.expressionSequence()),
-      "]",
+      ']'
     ]);
   }
 
   visitMemberDotExpression(node: Parser.MemberDotExpressionContext) {
     return this.text(node, [
       this.visit(node.singleExpression()),
-      ".",
-      this.visit(node.identifierName()),
+      '.',
+      this.visit(node.identifierName())
     ]);
   }
 
   visitArgumentsExpression(node: Parser.ArgumentsExpressionContext) {
     return this.text(node, [
       this.visit(node.singleExpression()),
-      this.visit(node.arguments()),
+      this.visit(node.arguments())
     ]);
   }
 
   visitArguments(node: Parser.ArgumentsContext) {
-    const args = node.argument().map((child) => this.visit(child));
-    const source = this.text(node, "(");
+    const args = node.argument().map(child => this.visit(child));
+    const source = this.text(node, '(');
     for (let i = 0; i < args.length; ++i) {
       if (i > 0) {
-        source.add(",");
+        source.add(',');
       }
       source.add(args[i]);
     }
-    source.add(")");
+    source.add(')');
     return source;
   }
 
   visitTypeofExpression(node: Parser.TypeofExpressionContext) {
-    return this.text(node, [
-      'typeof ',
-      this.visit(node.singleExpression()),
-    ]);
+    return this.text(node, ['typeof ', this.visit(node.singleExpression())]);
   }
 
   visitUnaryPlusExpression(node: Parser.UnaryPlusExpressionContext) {
@@ -271,7 +308,7 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
     return this.text(node, [
       this.visit(node.singleExpression(0)),
       '**',
-      this.visit(node.singleExpression(1)),
+      this.visit(node.singleExpression(1))
     ]);
   }
 
@@ -279,7 +316,7 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
     return this.text(node, [
       this.visit(node.singleExpression(0)),
       node.children![1].text,
-      this.visit(node.singleExpression(1)),
+      this.visit(node.singleExpression(1))
     ]);
   }
 
@@ -287,7 +324,7 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
     return this.text(node, [
       this.visit(node.singleExpression(0)),
       node.children![1].text,
-      this.visit(node.singleExpression(1)),
+      this.visit(node.singleExpression(1))
     ]);
   }
 
@@ -295,7 +332,7 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
     return this.text(node, [
       this.visit(node.singleExpression(0)),
       node.children![1].text,
-      this.visit(node.singleExpression(1)),
+      this.visit(node.singleExpression(1))
     ]);
   }
 
@@ -303,7 +340,7 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
     return this.text(node, [
       this.visit(node.singleExpression(0)),
       node.children![1].text,
-      this.visit(node.singleExpression(1)),
+      this.visit(node.singleExpression(1))
     ]);
   }
 
@@ -311,7 +348,7 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
     return this.text(node, [
       this.visit(node.singleExpression(0)),
       ' instanceof ',
-      this.visit(node.singleExpression(1)),
+      this.visit(node.singleExpression(1))
     ]);
   }
 
@@ -319,7 +356,7 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
     return this.text(node, [
       this.visit(node.singleExpression(0)),
       ' in ',
-      this.visit(node.singleExpression(1)),
+      this.visit(node.singleExpression(1))
     ]);
   }
 
@@ -327,7 +364,7 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
     return this.text(node, [
       this.visit(node.singleExpression(0)),
       node.children![1].text,
-      this.visit(node.singleExpression(1)),
+      this.visit(node.singleExpression(1))
     ]);
   }
 
@@ -335,7 +372,7 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
     return this.text(node, [
       this.visit(node.singleExpression(0)),
       '&',
-      this.visit(node.singleExpression(1)),
+      this.visit(node.singleExpression(1))
     ]);
   }
 
@@ -343,7 +380,7 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
     return this.text(node, [
       this.visit(node.singleExpression(0)),
       '|',
-      this.visit(node.singleExpression(1)),
+      this.visit(node.singleExpression(1))
     ]);
   }
 
@@ -351,7 +388,7 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
     return this.text(node, [
       this.visit(node.singleExpression(0)),
       '&&',
-      this.visit(node.singleExpression(1)),
+      this.visit(node.singleExpression(1))
     ]);
   }
 
@@ -359,7 +396,7 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
     return this.text(node, [
       this.visit(node.singleExpression(0)),
       '||',
-      this.visit(node.singleExpression(1)),
+      this.visit(node.singleExpression(1))
     ]);
   }
 
@@ -369,15 +406,15 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
       '?',
       this.visit(node.singleExpression(1)),
       ':',
-      this.visit(node.singleExpression(1)),
+      this.visit(node.singleExpression(1))
     ]);
   }
 
   visitIdentifierExpression(node: Parser.IdentifierExpressionContext) {
     if (this.symbols.has(node.text)) {
-      return this.text(node, "_" + node.text);
+      return this.text(node, '_' + node.text);
     }
-    return this.text(node, "$." + node.text);
+    return this.text(node, '$.' + node.text);
   }
 
   visitLiteralExpression(node: Parser.LiteralExpressionContext) {
@@ -385,7 +422,7 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
   }
 
   visitParenthesizedExpression(node: Parser.ParenthesizedExpressionContext) {
-    return this.text(node, ["(" + this.visitChildren(node), ")"]);
+    return this.text(node, ['(' + this.visitChildren(node), ')']);
   }
 
   visitIdentifierName(node: Parser.IdentifierNameContext) {
@@ -417,4 +454,18 @@ function isSpanSegment(segment: Parser.SegmentContext): boolean {
 function isPrintSegment(segment: Parser.SegmentContext): boolean {
   if (segment.childCount === 0) return false;
   return segment.getChild(0) instanceof Parser.PrintContext;
+}
+
+function isPartialUseSegment(segment: Parser.SegmentContext): boolean {
+  if (segment.childCount === 0) return false;
+  return segment.getChild(0) instanceof Parser.PartialUseContext;
+}
+
+function isWordSeg(segment: Parser.SegmentContext): boolean {
+  if (segment.childCount === 0) return false;
+  return (
+    isSpanSegment(segment) ||
+    isPrintSegment(segment) ||
+    isPartialUseSegment(segment)
+  );
 }

@@ -29,6 +29,7 @@ import { IdentifierExpressionContext } from "./TBLKParser";
 import { LiteralExpressionContext } from "./TBLKParser";
 import { ParenthesizedExpressionContext } from "./TBLKParser";
 import { DocumentContext } from "./TBLKParser";
+import { PartialContext } from "./TBLKParser";
 import { RowContext } from "./TBLKParser";
 import { SegmentContext } from "./TBLKParser";
 import { SpanContext } from "./TBLKParser";
@@ -38,6 +39,10 @@ import { LoopEndContext } from "./TBLKParser";
 import { IfBeginContext } from "./TBLKParser";
 import { ElseCmdContext } from "./TBLKParser";
 import { IfEndContext } from "./TBLKParser";
+import { PartialBeginContext } from "./TBLKParser";
+import { PartialEndContext } from "./TBLKParser";
+import { PartialUseContext } from "./TBLKParser";
+import { AssignmentContext } from "./TBLKParser";
 import { ArgumentsContext } from "./TBLKParser";
 import { ArgumentContext } from "./TBLKParser";
 import { ExpressionSequenceContext } from "./TBLKParser";
@@ -392,6 +397,17 @@ export interface TBLKParserListener extends ParseTreeListener {
 	exitDocument?: (ctx: DocumentContext) => void;
 
 	/**
+	 * Enter a parse tree produced by `TBLKParser.partial`.
+	 * @param ctx the parse tree
+	 */
+	enterPartial?: (ctx: PartialContext) => void;
+	/**
+	 * Exit a parse tree produced by `TBLKParser.partial`.
+	 * @param ctx the parse tree
+	 */
+	exitPartial?: (ctx: PartialContext) => void;
+
+	/**
 	 * Enter a parse tree produced by `TBLKParser.row`.
 	 * @param ctx the parse tree
 	 */
@@ -489,6 +505,50 @@ export interface TBLKParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitIfEnd?: (ctx: IfEndContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `TBLKParser.partialBegin`.
+	 * @param ctx the parse tree
+	 */
+	enterPartialBegin?: (ctx: PartialBeginContext) => void;
+	/**
+	 * Exit a parse tree produced by `TBLKParser.partialBegin`.
+	 * @param ctx the parse tree
+	 */
+	exitPartialBegin?: (ctx: PartialBeginContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `TBLKParser.partialEnd`.
+	 * @param ctx the parse tree
+	 */
+	enterPartialEnd?: (ctx: PartialEndContext) => void;
+	/**
+	 * Exit a parse tree produced by `TBLKParser.partialEnd`.
+	 * @param ctx the parse tree
+	 */
+	exitPartialEnd?: (ctx: PartialEndContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `TBLKParser.partialUse`.
+	 * @param ctx the parse tree
+	 */
+	enterPartialUse?: (ctx: PartialUseContext) => void;
+	/**
+	 * Exit a parse tree produced by `TBLKParser.partialUse`.
+	 * @param ctx the parse tree
+	 */
+	exitPartialUse?: (ctx: PartialUseContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `TBLKParser.assignment`.
+	 * @param ctx the parse tree
+	 */
+	enterAssignment?: (ctx: AssignmentContext) => void;
+	/**
+	 * Exit a parse tree produced by `TBLKParser.assignment`.
+	 * @param ctx the parse tree
+	 */
+	exitAssignment?: (ctx: AssignmentContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `TBLKParser.arguments`.

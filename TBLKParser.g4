@@ -2,8 +2,9 @@ parser grammar TBLKParser;
 
 options { tokenVocab=TBLKLexer; }
 
-document    :   (row)? (LINE_FEED row)* ;
+document    :   (row | partial)? (LINE_FEED (row | partial))* ;
 
+partial     :   partialBegin LINE_FEED? (row LINE_FEED)* row? partialEnd ;
 row         :   segment* ;
 
 segment     :   span
@@ -13,6 +14,7 @@ segment     :   span
             |   ifBegin
             |   elseCmd
             |   ifEnd
+            |   partialUse
             ;
 
 span        :   TEXT ;
@@ -22,6 +24,10 @@ loopEnd     :   OPEN '/for' CLOSE ;
 ifBegin     :   OPEN 'if' expressionSequence CLOSE ;
 elseCmd     :   OPEN 'else' CLOSE ;
 ifEnd       :   OPEN '/if' CLOSE ;
+partialBegin:   OPEN 'function' identifier CLOSE ;
+partialEnd  :   OPEN '/function' CLOSE ;
+partialUse  :   OPEN '#' identifier assignment* CLOSE ;
+assignment  :   identifier '=' singleExpression ;
 
 arguments
     : '('(argument (',' argument)* ','?)?')'

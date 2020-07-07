@@ -27,8 +27,9 @@ export class SymbolTable<K, V> {
     return undefined;
   }
 
-  set(key: K, value: V){
-    if (this.frames.length === 0) throw new Error('SymbolTable: Set on empty frames stack');
+  set(key: K, value: V) {
+    if (this.frames.length === 0)
+      throw new Error('SymbolTable: Set on empty frames stack');
     const last = this.frames[this.frames.length - 1];
     last.set(key, value);
   }

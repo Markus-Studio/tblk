@@ -18,6 +18,8 @@ CLOSE       :   '%>'                   -> popMode ;
 LOOP_END    :   '/for' ;
 IF_END      :   '/if' ;
 LET_END     :   '/let' ;
+FUNCTION_END:   '/function' ;
+HASH        :   '#' ;
 
 // JavaScript expressions:
 
@@ -53,6 +55,7 @@ BitXOr:                         '^';
 BitOr:                          '|';
 And:                            '&&';
 Or:                             '||';
+Assignment:                     '=';
 
 /// Null Literals
 
