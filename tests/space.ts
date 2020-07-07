@@ -1,5 +1,5 @@
 import { test, assertEqual } from 'liltest';
-import { compile, compileSource } from '../src/lib';
+import { compile } from '../src/lib';
 
 test({
   name: "Should preserve indention",
