@@ -19,8 +19,6 @@ const DEFAULT_OPTIONS: CompileOptions = {
   sourceMap: false
 };
 
-export { Writer };
-
 export function compileSource(
   source: string,
   options?: Partial<CompileOptions>

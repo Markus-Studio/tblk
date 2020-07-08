@@ -9,7 +9,12 @@ OPEN        :   '<%'                   -> pushMode(INSIDE) ;
 LINE_FEED   :   '\r'? '\n' ;
 
 // Match the text as long as there is no `\r?\n` nor `<%`.
-TEXT        :   ( ~('<' | '\r' | '\n') | ( '<'+ ~[<%] ) | ( '\r'+ ~[\r\n] ) )* '%'* ;
+TEXT        :   ( NOT_END+ | . ) ;
+
+NOT_END     :   '<'+ ~[<%]
+            |   '\r'+ ~[\r\n]
+            |   ~('<' | '\r' | '\n')+
+            ;
 
 // ----------------- Everything INSIDE of a command ---------------------
 mode INSIDE;
