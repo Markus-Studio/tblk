@@ -1,0 +1,10 @@
+{
+  "outDir": "./dist",
+  "compilerOptions": {
+    "sourceMap": true,
+    "typescript": false
+  },
+  "include": [
+    "templates/**/*.tblk"
+  ]
+}

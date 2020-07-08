@@ -1,0 +1,12 @@
+{
+  "name": "tblk-example",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "dependencies": {
+    "tblk": "../"
+  },
+  "scripts": {
+    "build": "tblk -config tblk.json"
+  }
+}

@@ -14,10 +14,13 @@
   "dependencies": {
     "antlr4ts": "^0.5.0-alpha.3",
     "btoa": "^1.2.1",
+    "glob": "^7.1.6",
+    "mkdirp": "^1.0.4",
     "source-map": "^0.7.3"
   },
   "devDependencies": {
     "@types/btoa": "^1.2.3",
+    "@types/glob": "^7.1.2",
     "@types/node": "^14.0.14",
     "antlr4ts-cli": "^0.5.0-alpha.3",
     "liltest": "^0.0.5",

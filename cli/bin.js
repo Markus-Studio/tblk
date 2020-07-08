@@ -1,54 +1,55 @@
 #!/usr/bin/env node
 
-const lib = require('../dist/src/lib');
+const cli = require('../dist/src/cli');
 const fs = require('fs');
 const path = require('path');
-
 const cwd = process.cwd();
 
-const options = {
-  files: [],
-  sourceMap: true,
-  typescript: false,
-  outputDir: null
-};
-
-for (let i = 2; i < process.argv.length; ++i) {
-  const arg = process.argv[i];
-  if (arg === '-ts') {
-    options.typescript = true;
-  } else if (arg === '-no-source-map') {
-    options.sourceMap = false;
-  } else if (arg === '-o') {
-    options.outputDir = process.argv[i + 1];
-    // Consume the next arg as well.
-    i += 1;
-  } else {
-    options.files.push(path.join(cwd, arg));
+function parseArguments() {
+  if (process.argv[2] === '-config') {
+    if (process.argv.length === 3) {
+      console.error('-config requires the path to the config file.')
+      process.exit(-1);
+    } else if (process.argv.length > 4) {
+      console.error('Unrecognized command line arguments after -config.')
+      process.exit(-1);
+    }
+    const configPath = path.join(cwd, process.argv[3]);
+    return {
+      ...JSON.parse(fs.readFileSync(configPath)),
+      root: path.dirname(configPath)
+    };
   }
+
+  const config = {
+    include: [],
+    root: cwd,
+    outDir: null,
+    compilerOptions: {
+      sourceMap: true,
+      typescript: false
+    }
+  };
+
+  for (let i = 2; i < process.argv.length; ++i) {
+    const arg = process.argv[i];
+    if(arg === '-config') {
+      console.error('-config cannot be used with other options.')
+      process.exit(-1);
+    } else if (arg === '-ts') {
+      config.compilerOptions.typescript = true;
+    } else if (arg === '-no-source-map') {
+      config.compilerOptions.sourceMap = false;
+    } else if (arg === '-o') {
+      config.outDir = process.argv[i + 1];
+      // Consume the next arg as well.
+      i += 1;
+    } else {
+      config.include.push(arg);
+    }
+  }
+
+  return config;
 }
 
-function getBaseName(file) {
-  const base = path.basename(file);
-  if (base.endsWith('.blk')) return base.slice(0, -4);
-  return base;
-}
-
-function getOutputPathFor(file) {
-  const ext = options.typescript ? '.ts' : '.js';
-  const filename = getBaseName(file) + ext;
-  const dir = options.outputDir ? options.outputDir : path.dirname(file);
-  return path.join(dir, filename);
-}
-
-for (const file of options.files) {
-  const output = getOutputPathFor(file);
-  const source = fs.readFileSync(file, 'utf-8');
-  const out = lib.compileSource(source, {
-    uri: file,
-    mode: 'javascript',
-    sourceMap: options.sourceMap,
-    typescript: options.typescript,
-  });
-  fs.writeFileSync(output, out);
-}
+cli.run(parseArguments());
