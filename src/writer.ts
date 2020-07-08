@@ -18,8 +18,8 @@ export class Writer {
     }
   }
 
-  write(chunk: string) {
-    this.current += chunk;
+  write(chunk: any) {
+    this.current += typeof chunk === "string" ? chunk : String(chunk);
   }
 
   brk() {

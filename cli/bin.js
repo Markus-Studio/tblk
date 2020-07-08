@@ -6,21 +6,25 @@ const path = require('path');
 
 const cwd = process.cwd();
 
-let mode = 'javascript';
-let ext = '.js';
-let output;
-let files = [];
+const options = {
+  files: [],
+  sourceMap: true,
+  typescript: false,
+  outputDir: null
+};
+
 for (let i = 2; i < process.argv.length; ++i) {
   const arg = process.argv[i];
   if (arg === '-ts') {
-    mode = 'typescript';
-    ext = '.ts';
+    options.typescript = true;
+  } else if (arg === '-no-source-map') {
+    options.sourceMap = false;
   } else if (arg === '-o') {
-    output = process.argv[i + 1]
+    options.outputDir = process.argv[i + 1];
     // Consume the next arg as well.
     i += 1;
   } else {
-    files.push(path.join(cwd, arg));
+    options.files.push(path.join(cwd, arg));
   }
 }
 
@@ -31,18 +35,20 @@ function getBaseName(file) {
 }
 
 function getOutputPathFor(file) {
+  const ext = options.typescript ? '.ts' : '.js';
   const filename = getBaseName(file) + ext;
-  const dir = output ? output : path.dirname(file);
+  const dir = options.outputDir ? options.outputDir : path.dirname(file);
   return path.join(dir, filename);
 }
 
-for (const file of files) {
+for (const file of options.files) {
   const output = getOutputPathFor(file);
   const source = fs.readFileSync(file, 'utf-8');
   const out = lib.compileSource(source, {
     uri: file,
-    mode,
-    sourceMap: true
+    mode: 'javascript',
+    sourceMap: options.sourceMap,
+    typescript: options.typescript,
   });
   fs.writeFileSync(output, out);
 }

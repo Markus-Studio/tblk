@@ -2,35 +2,52 @@ import { ANTLRInputStream, CommonTokenStream } from 'antlr4ts';
 import btoa = require('btoa');
 import { TBLKLexer } from '../grammar/TBLKLexer';
 import { TBLKParser } from '../grammar/TBLKParser';
-import { Compiler, CompilationMode } from './compiler';
+import { Compiler, CompilerOptions } from './compiler';
 import { Writer } from './writer';
 
+/**
+ * A dynamically compiled/evaluated template.
+ */
 export type Template = (data?: Record<string, any>) => string;
 
-export type CompileOptions = {
-  uri: string | null;
-  sourceMap: boolean;
-  mode: CompilationMode;
-};
-
-const DEFAULT_OPTIONS: CompileOptions = {
+const DEFAULT_OPTIONS: CompilerOptions = {
   uri: null,
   mode: 'iife',
-  sourceMap: false
+  sourceMap: false,
+  typescript: false
 };
 
+// Re-export for documentation purposes.
+export { CompilerOptions as CompileOptions };
+
+/**
+ * Compiles the template returning the generated source code, this is an
+ * advanced API in most cases you might want to use {@link compile}.
+ * 
+ * @param source The template source code.
+ * @param options Options passed to the compiler.
+ * ## Default Options
+ * ```ts
+ * {
+ *  uri: null,
+ *  mode: 'iife',
+ *  sourceMap: false,
+ *  typescript: false
+ * }
+ * ```
+ */
 export function compileSource(
   source: string,
-  options?: Partial<CompileOptions>
+  options?: Partial<CompilerOptions>
 ): string {
-  const OPTIONS: CompileOptions = { ...DEFAULT_OPTIONS, ...options };
+  const OPTIONS: CompilerOptions = { ...DEFAULT_OPTIONS, ...options };
 
   const inputStream = new ANTLRInputStream(source);
   const lexer = new TBLKLexer(inputStream);
   const tokenStream = new CommonTokenStream(lexer);
   const parser = new TBLKParser(tokenStream);
   const tree = parser.document();
-  const visitor = new Compiler(OPTIONS.uri, OPTIONS.mode);
+  const visitor = new Compiler(OPTIONS);
   const compiled = visitor.visit(tree);
 
   if (!OPTIONS.sourceMap) {
@@ -47,7 +64,23 @@ export function compileSource(
   return withMap;
 }
 
-export function compile(template: string, options?: CompileOptions): Template {
-  const source = compileSource(template, { ...options, mode: 'iife' });
+/**
+ * Dynamically compiles the template and returns a {@link Template} function,
+ * you must prefer pre-compiling the template files, for faster bootstraps.
+ * 
+ * # Example
+ * ```ts
+ * import { compile } from 'tblk';
+ * const template = compile('Hello <% name %>!');
+ * console.log(template({name: "World" }));
+ * ```
+ * 
+ * @param template The source code for the template.
+ * @param options Options passed to the compiler.
+ * `mode` and `typescript` options are ignored and the default values of `iife` and
+ * `false` are used accordingly.
+ */
+export function compile(template: string, options?: Partial<CompilerOptions>): Template {
+  const source = compileSource(template, { ...options, mode: 'iife', typescript: false });
   return eval(source)(Writer);
 }
