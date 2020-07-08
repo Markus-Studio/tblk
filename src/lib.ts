@@ -14,7 +14,8 @@ const DEFAULT_OPTIONS: CompilerOptions = {
   uri: null,
   mode: 'iife',
   sourceMap: false,
-  typescript: false
+  typescript: false,
+  partials: null
 };
 
 // Re-export for documentation purposes.
@@ -23,7 +24,7 @@ export { CompilerOptions as CompileOptions };
 /**
  * Compiles the template returning the generated source code, this is an
  * advanced API in most cases you might want to use {@link compile}.
- * 
+ *
  * @param source The template source code.
  * @param options Options passed to the compiler.
  * ## Default Options
@@ -32,7 +33,8 @@ export { CompilerOptions as CompileOptions };
  *  uri: null,
  *  mode: 'iife',
  *  sourceMap: false,
- *  typescript: false
+ *  typescript: false,
+ *  partials: null
  * }
  * ```
  */
@@ -67,20 +69,27 @@ export function compileSource(
 /**
  * Dynamically compiles the template and returns a {@link Template} function,
  * you must prefer pre-compiling the template files, for faster bootstraps.
- * 
+ *
  * # Example
  * ```ts
  * import { compile } from 'tblk';
  * const template = compile('Hello <% name %>!');
  * console.log(template({name: "World" }));
  * ```
- * 
+ *
  * @param template The source code for the template.
  * @param options Options passed to the compiler.
  * `mode` and `typescript` options are ignored and the default values of `iife` and
  * `false` are used accordingly.
  */
-export function compile(template: string, options?: Partial<CompilerOptions>): Template {
-  const source = compileSource(template, { ...options, mode: 'iife', typescript: false });
+export function compile(
+  template: string,
+  options?: Partial<CompilerOptions>
+): Template {
+  const source = compileSource(template, {
+    ...options,
+    mode: 'iife',
+    typescript: false
+  });
   return eval(source)(Writer);
 }

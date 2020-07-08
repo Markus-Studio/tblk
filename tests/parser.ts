@@ -105,4 +105,3 @@ test({
 //     assertEqual(template(), 'ABC\r3');
 //   }
 // });
-

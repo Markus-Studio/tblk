@@ -19,7 +19,7 @@ export class Writer {
   }
 
   write(chunk: any) {
-    this.current += typeof chunk === "string" ? chunk : String(chunk);
+    this.current += typeof chunk === 'string' ? chunk : String(chunk);
   }
 
   brk() {
