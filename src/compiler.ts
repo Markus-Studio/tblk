@@ -469,7 +469,7 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
   }
 
   visitNotExpression(node: Parser.NotExpressionContext) {
-    return this.text(node, ['-', this.visit(node.singleExpression())]);
+    return this.text(node, ['!', this.visit(node.singleExpression())]);
   }
 
   visitPowerExpression(node: Parser.PowerExpressionContext) {
