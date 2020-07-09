@@ -64,3 +64,21 @@ test({
     assertEqual(template({ a: 3, b: 4, c: 5 }), '3');
   }
 });
+
+test({
+  name: 'Single loop filter',
+  fn() {
+    const template = compile('<% for x in x |> x <= 4 %><% x %><% /for %>');
+    assertEqual(template({ x: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }), '01234');
+  }
+});
+
+test({
+  name: 'Multiple loop filters',
+  fn() {
+    const template = compile(
+      '<% for x in x |> x <= 4 |> x >= 2 %><% x %><% /for %>'
+    );
+    assertEqual(template({ x: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }), '234');
+  }
+});

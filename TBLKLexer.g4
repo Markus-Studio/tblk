@@ -25,6 +25,7 @@ IF_END      :   '/if' ;
 LET_END     :   '/let' ;
 FUNCTION_END:   '/function' ;
 HASH        :   '#' ;
+FILTER      :   '|>' ;
 
 // JavaScript expressions:
 

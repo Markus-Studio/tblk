@@ -1,4 +1,4 @@
-import { promises as fs } from "fs";
+import { promises as fs } from 'fs';
 import { join, basename, dirname, relative } from 'path';
 import * as glob from 'glob';
 import { PartialInfo, CompilerOptions } from './compiler';
@@ -7,7 +7,7 @@ const mkdirp = require('mkdirp');
 
 export interface Config {
   include: string[];
-  root: string,
+  root: string;
   outDir?: string;
   compilerOptions: {
     typescript: boolean;
@@ -27,11 +27,11 @@ export async function run(config: Config) {
   const includePaths: Set<string> = new Set(
     (
       await Promise.all(
-        config.include.map((pattern) => globPromise(pattern, root))
+        config.include.map(pattern => globPromise(pattern, root))
       )
     )
       .flat()
-      .map((path) => join(root, path))
+      .map(path => join(root, path))
   );
 
   const partials: PartialInfo[] = [];
@@ -55,7 +55,7 @@ export async function run(config: Config) {
         name: base.slice(1),
         path: partialPath,
         uri: path
-      })
+      });
     }
   }
 
@@ -71,18 +71,18 @@ export async function run(config: Config) {
     const outDir = dirname(outputPath);
 
     const options: CompilerOptions = {
-      mode: partial ? "partial" : "javascript",
+      mode: partial ? 'partial' : 'javascript',
       typescript: config.compilerOptions.typescript,
       sourceMap: config.compilerOptions.sourceMap,
       uri: path,
-      partials: partials.map((info) => {
+      partials: partials.map(info => {
         const path = relative(outDir, info.path);
         return {
           name: info.name,
-          path: path.startsWith(".") ? path : "./" + path,
-          uri: info.path,
+          path: path.startsWith('.') ? path : './' + path,
+          uri: info.path
         };
-      }),
+      })
     };
 
     const output = compileSource(source, options);
@@ -95,7 +95,9 @@ export async function run(config: Config) {
     await fs.writeFile(outputPath, output);
   }
 
-  await Promise.all(compileQueue.map(info => compile(info.path, info.output, info.partial)));
+  await Promise.all(
+    compileQueue.map(info => compile(info.path, info.output, info.partial))
+  );
 }
 
 function globPromise(pattern: string, root: string): Promise<string[]> {
@@ -104,7 +106,7 @@ function globPromise(pattern: string, root: string): Promise<string[]> {
       pattern,
       {
         cwd: root,
-        root,
+        root
       },
       (err, files) => {
         if (err) return void reject(err);

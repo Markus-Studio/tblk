@@ -19,8 +19,9 @@ segment     :   span
 
 span        :   TEXT ;
 print       :   OPEN expressionSequence CLOSE ;
-loopBegin   :   OPEN 'for' identifier 'in' expressionSequence CLOSE ;
+loopBegin   :   OPEN 'for' identifier 'in' expressionSequence loopFilter* CLOSE ;
 loopEnd     :   OPEN '/for' CLOSE ;
+loopFilter  :   FILTER expressionSequence ;
 ifBegin     :   OPEN 'if' expressionSequence CLOSE ;
 elseCmd     :   OPEN 'else' CLOSE ;
 ifEnd       :   OPEN '/if' CLOSE ;

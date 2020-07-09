@@ -340,7 +340,17 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
       this.visit(id),
       ' of ',
       expr,
-      ') {\n'
+      ') {\n',
+      ...context.loopFilter().map(f => this.visit(f))
+    ]);
+  }
+
+  visitLoopFilter(context: Parser.LoopFilterContext) {
+    return this.text(context, [
+      this.indention,
+      'if (!(',
+      this.visit(context.expressionSequence()),
+      ')) continue;\n'
     ]);
   }
 

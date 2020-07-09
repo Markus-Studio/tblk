@@ -37,6 +37,7 @@ import { SpanContext } from "./TBLKParser";
 import { PrintContext } from "./TBLKParser";
 import { LoopBeginContext } from "./TBLKParser";
 import { LoopEndContext } from "./TBLKParser";
+import { LoopFilterContext } from "./TBLKParser";
 import { IfBeginContext } from "./TBLKParser";
 import { ElseCmdContext } from "./TBLKParser";
 import { IfEndContext } from "./TBLKParser";
@@ -486,6 +487,17 @@ export interface TBLKParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitLoopEnd?: (ctx: LoopEndContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `TBLKParser.loopFilter`.
+	 * @param ctx the parse tree
+	 */
+	enterLoopFilter?: (ctx: LoopFilterContext) => void;
+	/**
+	 * Exit a parse tree produced by `TBLKParser.loopFilter`.
+	 * @param ctx the parse tree
+	 */
+	exitLoopFilter?: (ctx: LoopFilterContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `TBLKParser.ifBegin`.
