@@ -13,6 +13,7 @@ segment     :   span
             |   loopEnd
             |   ifBegin
             |   elseCmd
+            |   elseIfCmd
             |   ifEnd
             |   partialUse
             ;
@@ -24,6 +25,7 @@ loopEnd     :   OPEN '/for' CLOSE ;
 loopFilter  :   FILTER expressionSequence ;
 ifBegin     :   OPEN 'if' expressionSequence CLOSE ;
 elseCmd     :   OPEN 'else' CLOSE ;
+elseIfCmd   :   OPEN 'else' 'if' expressionSequence CLOSE ;
 ifEnd       :   OPEN '/if' CLOSE ;
 partialBegin:   OPEN 'function' identifier CLOSE ;
 partialEnd  :   OPEN '/function' CLOSE ;

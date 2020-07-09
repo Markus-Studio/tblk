@@ -82,3 +82,16 @@ test({
     assertEqual(template({ x: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }), '234');
   }
 });
+
+test({
+  name: 'Else If',
+  fn() {
+    const template = compile(
+      '<% if lang === "fa" %>Salam<% else if lang === "du" %>Hallo<% else if lang === "ru" %>Пока<% else %>Hello<% /if %>!'
+    );
+    assertEqual(template({ lang: 'fa' }), 'Salam!');
+    assertEqual(template({ lang: 'du' }), 'Hallo!');
+    assertEqual(template({ lang: 'ru' }), 'Пока!');
+    assertEqual(template({}), 'Hello!');
+  }
+});

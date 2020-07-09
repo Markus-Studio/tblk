@@ -384,6 +384,20 @@ export class Compiler extends AbstractParseTreeVisitor<SourceNode>
     return this.text(context, [indention, '} else {\n']);
   }
 
+  visitElseIfCmd(context: Parser.ElseIfCmdContext) {
+    this.check('if');
+    if (this.usedElse) throw new Error('`Else` is already used.');
+    this.indentLevel--;
+    const indention = this.indention;
+    this.indentLevel++;
+    return this.text(context, [
+      indention,
+      '} else if (',
+      this.visit(context.expressionSequence()),
+      ') {\n'
+    ]);
+  }
+
   visitIfEnd(context: Parser.IfEndContext) {
     this.pop('if');
     this.indentLevel--;

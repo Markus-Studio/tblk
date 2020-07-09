@@ -40,6 +40,7 @@ import { LoopEndContext } from "./TBLKParser";
 import { LoopFilterContext } from "./TBLKParser";
 import { IfBeginContext } from "./TBLKParser";
 import { ElseCmdContext } from "./TBLKParser";
+import { ElseIfCmdContext } from "./TBLKParser";
 import { IfEndContext } from "./TBLKParser";
 import { PartialBeginContext } from "./TBLKParser";
 import { PartialEndContext } from "./TBLKParser";
@@ -349,6 +350,13 @@ export interface TBLKParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitElseCmd?: (ctx: ElseCmdContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `TBLKParser.elseIfCmd`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitElseIfCmd?: (ctx: ElseIfCmdContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `TBLKParser.ifEnd`.
