@@ -11,7 +11,7 @@ LINE_FEED   :   '\r'? '\n' ;
 // Match the text as long as there is no `\r?\n` nor `<%`.
 TEXT        :   ( NOT_END+ | . ) ;
 
-NOT_END     :   '<'+ ~[<%]
+NOT_END     :   '<'+ ~[<%\n]
             |   '\r'+ ~[\r\n]
             |   ~('<' | '\r' | '\n')+
             ;

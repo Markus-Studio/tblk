@@ -10,14 +10,6 @@ export class Writer {
   private current = '';
   private stack: StackItem[] = [];
 
-  resetIndention() {
-    if (this.stack.length === 0) {
-      this.indention = '';
-    } else {
-      this.indention = this.stack[this.stack.length - 1].indention;
-    }
-  }
-
   write(chunk: any) {
     this.current += typeof chunk === 'string' ? chunk : String(chunk);
   }
@@ -32,8 +24,7 @@ export class Writer {
     } else {
       this.result += '\n';
     }
-    this.resetIndention();
-    this.current = '';
+    this.indention = this.current = '';
   }
 
   flush() {
@@ -45,8 +36,7 @@ export class Writer {
   }
 
   indent(indention: string) {
-    this.resetIndention();
-    this.indention += indention;
+    this.indention = indention;
   }
 
   push() {
@@ -55,8 +45,7 @@ export class Writer {
       indention: this.indention,
       current: this.current
     });
-    this.result = this.current = '';
-    this.resetIndention();
+    this.result = this.indention = this.current = '';
   }
 
   pop() {

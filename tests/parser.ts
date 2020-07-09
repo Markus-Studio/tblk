@@ -97,6 +97,14 @@ test({
   }
 });
 
+test({
+  name: '<\\n',
+  fn() {
+    const template = compile('  <% 1 + 2 %>X<\n  B\n  A');
+    assertEqual(template(), '  3X<\n  B\n  A');
+  }
+});
+
 // This fails :(
 // test({
 //   name: 'ABC\\r<% 1 + 2 %>',
