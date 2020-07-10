@@ -15,23 +15,23 @@ export class Writer {
   }
 
   brk() {
-    if (this.current) {
-      this.result +=
-        this.current
-          .split(/\r?\n/g)
-          .map(line => this.indention + line)
-          .join('\n') + '\n';
-    } else {
-      this.result += '\n';
-    }
-    this.indention = this.current = '';
+    this.flush();
+    this.result += '\n';
+    this.indention = '';
   }
 
   flush() {
-    this.result += this.current
+    const lines = this.current
       .split(/\r?\n/g)
-      .map(line => this.indention + line)
-      .join('\n');
+      .map(line => (line ? this.indention + line : ''));
+    if (
+      lines.length &&
+      lines[0] === '' &&
+      this.result.length &&
+      this.result[this.result.length - 1] === '\n'
+    )
+      lines.shift();
+    this.result += lines.join('\n');
     this.current = '';
   }
 

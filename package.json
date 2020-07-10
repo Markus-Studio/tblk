@@ -1,6 +1,6 @@
 {
   "name": "tblk",
-  "version": "0.1.0",
+  "version": "0.9.0",
   "main": "dist/src/lib.js",
   "license": "MIT",
   "scripts": {
